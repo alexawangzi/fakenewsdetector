@@ -22,26 +22,26 @@ app = Flask(__name__)
 
 @app.route('/')
 def root():
+    from apiclient.discovery import build
 
-    # Imports the Google Cloud client library
-    from google.cloud import language
-    from google.cloud.language import enums
-    from google.cloud.language import types
+    apikey = 'AIzaSyDGz8ELBxqAGhBw5CWfDE1YxGigbrkf6QU'
 
-    # Instantiates a client
-    client = language.LanguageServiceClient()
+    service = build('language', 'v1', developerKey=apikey)
+    collection = service.documents()
 
-    # The text to analyze
-    text = u'Hello, world!'
-    document = types.Document(
-        content=text,
-        type=enums.Document.Type.PLAIN_TEXT)
+    data = {}
+    data['document'] = {}
+    data['document']['language'] = 'en'
+    data['document']['content'] = 'I am really happy'
+    data['document']['type'] = 'PLAIN_TEXT'
 
-    # Detects the sentiment of the text
-    sentiment = client.analyze_sentiment(document=document).document_sentiment
+    request = collection.analyzeSentiment(body=data)
+    sentiment = request.execute()
 
+    return json.dumps(sentiment)
 
-    return json.dumps('Sentiment: {}, {}'.format(sentiment.score, sentiment.magnitude))
+    #
+    # return json.dumps('Sentiment: {}, {}'.format(sentiment.documentSentiment.score, sentiment.documentSentiment.magnitude))
 
 
 if __name__ == '__main__':
