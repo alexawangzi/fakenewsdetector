@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # [START gae_python37_render_template]
-import datetime
+import json
 
 from flask import Flask, render_template
 
@@ -22,14 +22,26 @@ app = Flask(__name__)
 
 @app.route('/')
 def root():
-    # For the sake of example, use static information to inflate the template.
-    # This will be replaced with real information in later steps.
-    dummy_times = [datetime.datetime(2018, 1, 1, 10, 0, 0),
-                   datetime.datetime(2018, 1, 2, 10, 30, 0),
-                   datetime.datetime(2018, 1, 3, 11, 0, 0),
-                   ]
 
-    return render_template('index.html', times=dummy_times)
+    # Imports the Google Cloud client library
+    from google.cloud import language
+    from google.cloud.language import enums
+    from google.cloud.language import types
+
+    # Instantiates a client
+    client = language.LanguageServiceClient()
+
+    # The text to analyze
+    text = u'Hello, world!'
+    document = types.Document(
+        content=text,
+        type=enums.Document.Type.PLAIN_TEXT)
+
+    # Detects the sentiment of the text
+    sentiment = client.analyze_sentiment(document=document).document_sentiment
+
+
+    return json.dumps('Sentiment: {}, {}'.format(sentiment.score, sentiment.magnitude))
 
 
 if __name__ == '__main__':
