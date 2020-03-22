@@ -20,9 +20,10 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/', methods=['POST'])
 def root():
     from apiclient.discovery import build
+    from flask import request
 
     apikey = 'AIzaSyDGz8ELBxqAGhBw5CWfDE1YxGigbrkf6QU'
 
@@ -32,11 +33,11 @@ def root():
     data = {}
     data['document'] = {}
     data['document']['language'] = 'en'
-    data['document']['content'] = 'I am really happy'
+    data['document']['content'] = request.get_json()['newsContent']
     data['document']['type'] = 'PLAIN_TEXT'
 
-    request = collection.analyzeSentiment(body=data)
-    sentiment = request.execute()
+    requestToAPI = collection.analyzeSentiment(body=data)
+    sentiment = requestToAPI.execute()
 
     return json.dumps(sentiment)
 
