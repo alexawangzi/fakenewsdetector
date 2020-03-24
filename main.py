@@ -20,29 +20,60 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
+
+
+
 @app.route('/', methods=['POST'])
 def root():
-    from apiclient.discovery import build
     from flask import request
+    req_json = request.get_json()
+    annotation = annotate_text(req_json)
+    news = fetch_news(annotation)
 
-    apikey = 'AIzaSyDGz8ELBxqAGhBw5CWfDE1YxGigbrkf6QU'
+    return news
 
-    service = build('language', 'v1', developerKey=apikey)
+
+def fetch_news(annotation):
+    import requests
+
+    url = ('http://newsapi.org/v2/everything?'
+           'q=korea'
+           'from=2020-03-23&'
+           'sortBy=popularity&'
+           'apiKey=556b4d8abee149088086f6412712effd')
+
+    response = requests.get(url)
+
+    return response.json()
+
+
+def annotate_text(req_json):
+    print(req_json)
+
+    from apiclient.discovery import build
+    nlpapikey = 'AIzaSyDGz8ELBxqAGhBw5CWfDE1YxGigbrkf6QU'
+
+    service = build('language', 'v1', developerKey=nlpapikey)
     collection = service.documents()
 
     data = {}
     data['document'] = {}
     data['document']['language'] = 'en'
-    data['document']['content'] = request.get_json()['newsContent']
+    data['document']['content'] = req_json['newsContent']
     data['document']['type'] = 'PLAIN_TEXT'
 
-    requestToAPI = collection.analyzeSentiment(body=data)
-    sentiment = requestToAPI.execute()
+    data['features'] = {}
+    data['features']['extractSyntax'] = True
+    data['features']['extractEntities'] = True
+    data['features']['extractDocumentSentiment'] = True
+    data['features']['extractEntitySentiment'] = True
+    data['features']['classifyText'] = True
 
-    return json.dumps(sentiment)
+    requestToAPI = collection.annotateText(body=data)
+    annotation = requestToAPI.execute()
 
-    #
-    # return json.dumps('Sentiment: {}, {}'.format(sentiment.documentSentiment.score, sentiment.documentSentiment.magnitude))
+    return json.dumps(annotation)
+
 
 
 if __name__ == '__main__':
