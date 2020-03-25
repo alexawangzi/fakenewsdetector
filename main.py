@@ -21,30 +21,46 @@ app = Flask(__name__)
 
 
 
-
-
 @app.route('/', methods=['POST'])
 def root():
     from flask import request
     req_json = request.get_json()
     annotation = annotate_text(req_json)
-    news = fetch_news(annotation)
+    keywords = filter_keywords(annotation)
+    news = fetch_news(keywords)
 
     return news
 
 
-def fetch_news(annotation):
+def encode_url(keywords):
+    encoded = 'q='
+    for i in keywords:
+        encoded = encoded + i + '%20'
+    encoded = encoded + '&'
+
+    return encoded
+
+
+def fetch_news(keywords):
     import requests
 
-    url = ('http://newsapi.org/v2/everything?'
-           'q=korea'
-           'from=2020-03-23&'
-           'sortBy=popularity&'
-           'apiKey=556b4d8abee149088086f6412712effd')
-
+    encoded = encode_url(keywords)
+    url = ('https://gnews.io/api/v3/search?' +
+           encoded +
+           'token=1376d43c67cb5722c9837cdc4dc8617c')
     response = requests.get(url)
 
     return response.json()
+
+
+def filter_keywords(annotation):
+    keywords = [element['name'] for element in annotation['entities']]
+
+    # TODO: further filter keywords
+
+    print(keywords)
+
+    return keywords
 
 
 def annotate_text(req_json):
@@ -63,16 +79,17 @@ def annotate_text(req_json):
     data['document']['type'] = 'PLAIN_TEXT'
 
     data['features'] = {}
-    data['features']['extractSyntax'] = True
+    # data['features']['extractSyntax'] = True
     data['features']['extractEntities'] = True
-    data['features']['extractDocumentSentiment'] = True
-    data['features']['extractEntitySentiment'] = True
-    data['features']['classifyText'] = True
+    # data['features']['extractDocumentSentiment'] = True
+    # data['features']['extractEntitySentiment'] = True
 
     requestToAPI = collection.annotateText(body=data)
     annotation = requestToAPI.execute()
 
-    return json.dumps(annotation)
+    print(json.dumps(annotation, indent=2, sort_keys=True))
+
+    return annotation
 
 
 
