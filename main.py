@@ -48,7 +48,14 @@ def fetch_news(keywords):
     url = ('https://gnews.io/api/v3/search?' +
            encoded +
            'token=1376d43c67cb5722c9837cdc4dc8617c')
+
+    print("url:")
+    print(url)
+
     response = requests.get(url)
+
+    print("news:")
+    print(response.content)
 
     return response.json()
 
@@ -58,6 +65,7 @@ def filter_keywords(annotation):
 
     # TODO: further filter keywords
 
+    print("keywords:")
     print(keywords)
 
     return keywords
@@ -87,6 +95,7 @@ def annotate_text(req_json):
     requestToAPI = collection.annotateText(body=data)
     annotation = requestToAPI.execute()
 
+    print("annotation:")
     print(json.dumps(annotation, indent=2, sort_keys=True))
 
     return annotation
