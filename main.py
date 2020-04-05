@@ -40,6 +40,14 @@ def encode_url(keywords):
 
     return encoded
 
+def format_news(response):
+    if response.content == '' or response.json()['articleCount'] == 0:
+        data = {}
+        data['articleCount'] = 0
+        return data
+    else:
+        return response.json()
+
 
 def fetch_news(keywords):
     import requests
@@ -52,12 +60,19 @@ def fetch_news(keywords):
     print("url:")
     print(url)
 
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(e)
+        data = {}
+        data['articleCount'] = 0
+        return data
 
     print("news:")
     print(response.content)
 
-    return response.json()
+    return format_news(response)
 
 
 def filter_keywords(annotation):
