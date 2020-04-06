@@ -35,7 +35,9 @@ def root():
 def encode_url(keywords):
     encoded = 'q='
     for i in keywords:
-        encoded = encoded + i + '%20'
+        encoded = encoded + i + '%7C'
+        # encoded = encoded + i + '%20'
+    encoded = encoded[:-3]
     encoded = encoded + '&'
 
     return encoded
