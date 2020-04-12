@@ -134,8 +134,7 @@ def get_bias(req_json):
         with open('biases.txt') as json_file:
             biases = json.load(json_file)
             for url in urls:
-                details = biases.get(url, '')
-                print(type(details))
+                details = biases.get(url, [])
                 if len(details) != 1:
                     continue
                 else:
