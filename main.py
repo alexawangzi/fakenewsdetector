@@ -20,16 +20,22 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 
-
 @app.route('/', methods=['POST'])
 def root():
     from flask import request
     req_json = request.get_json()
     annotation = annotate_text(req_json)
+    sentiment = get_sentiment(annotation)
     keywords = filter_keywords(annotation)
     news = fetch_news(keywords)
+    bias = get_bias(req_json)
 
-    return news
+    result = {}
+    result['news'] = news
+    result['sentiment'] = sentiment
+    result['bias'] = bias
+
+    return json.dumps(result)
 
 
 def encode_url(keywords):
@@ -59,8 +65,8 @@ def fetch_news(keywords):
            encoded +
            'token=1376d43c67cb5722c9837cdc4dc8617c')
 
-    print("url:")
-    print(url)
+    # print("url:")
+    # print(url)
 
     try:
         response = requests.get(url)
@@ -71,16 +77,18 @@ def fetch_news(keywords):
         data['articleCount'] = 0
         return data
 
-    print("news:")
-    print(response.content)
+    # print("news:")
+    # print(response.content)
 
     return format_news(response)
 
 
+def get_sentiment(annotation):
+    return annotation['documentSentiment']
+
+
 def filter_keywords(annotation):
     keywords = [element['name'] for element in annotation['entities']]
-
-    # TODO: further filter keywords
 
     print("keywords:")
     print(keywords)
@@ -89,7 +97,6 @@ def filter_keywords(annotation):
 
 
 def annotate_text(req_json):
-    print(req_json)
 
     from apiclient.discovery import build
     nlpapikey = 'AIzaSyDGz8ELBxqAGhBw5CWfDE1YxGigbrkf6QU'
@@ -106,17 +113,42 @@ def annotate_text(req_json):
     data['features'] = {}
     # data['features']['extractSyntax'] = True
     data['features']['extractEntities'] = True
-    # data['features']['extractDocumentSentiment'] = True
+    data['features']['extractDocumentSentiment'] = True
     # data['features']['extractEntitySentiment'] = True
 
     requestToAPI = collection.annotateText(body=data)
     annotation = requestToAPI.execute()
 
-    print("annotation:")
-    print(json.dumps(annotation, indent=2, sort_keys=True))
+    # print("annotation:")
+    # print(json.dumps(annotation, indent=2, sort_keys=True))
 
     return annotation
 
+
+def get_bias(req_json):
+    urls = req_json['urls']
+    result = []
+    if len(urls) == 0:
+        return []
+    else:
+        with open('biases.txt') as json_file:
+            biases = json.load(json_file)
+            for url in urls:
+                details = biases.get(url, '')
+                print(type(details))
+                if len(details) != 1:
+                    continue
+                else:
+                    bias = {}
+                    print(details[0])
+                    print(details[0]['name'])
+                    print(details[0]['category'])
+                    print(details[0]['factual'])
+                    bias['name'] = details[0]['name']
+                    bias['category'] = details[0]['category']
+                    bias['factual'] = details[0]['factual']
+                    result.append(bias)
+    return result
 
 
 if __name__ == '__main__':
