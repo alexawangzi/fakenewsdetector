@@ -93,7 +93,12 @@ def filter_keywords(annotation):
     print("keywords:")
     print(keywords)
 
-    return keywords
+    filtered_keywords = [k for k in keywords if '.' not in k and not any(char.isdigit() for char in k)]
+
+    print("filtered keywords:")
+    print(filtered_keywords)
+
+    return filtered_keywords
 
 
 def annotate_text(req_json):
