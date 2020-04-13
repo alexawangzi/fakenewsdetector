@@ -93,7 +93,9 @@ def filter_keywords(annotation):
     print("keywords:")
     print(keywords)
 
-    filtered_keywords = [k for k in keywords if '.' not in k and not any(char.isdigit() for char in k)]
+    chars = set('0123456789$,.@#$%^&()_-=[]{}\/<>?|~`!')
+
+    filtered_keywords = [k for k in keywords if not any((c in chars) for c in k) and not any(char.isdigit() for char in k)]
 
     if len(filtered_keywords) > 10:
         filtered_keywords = filtered_keywords[:10]
