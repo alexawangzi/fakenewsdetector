@@ -3,16 +3,18 @@ import urllib
 from urllib.request import urlopen as uReq  # Web client
 import json
 
+
 def get_homepages(page_soup, url):
     sources = page_soup.find_all(
         lambda tag: tag.name == 'p' and (
-                    tag.text.startswith('Sources:') or tag.text.startswith('Source:')))
+                tag.text.startswith('Sources:') or tag.text.startswith('Source:')))
     homepages = set()
     for source in sources:
         try:
-            homepages.add(source.find("a")['href'])
-        except TypeError:
+            homepages.add(source.find("a")['href'].replace('<br>', ''))
+        except:
             print("Unable to retrieve homepage from: " + str(source))
+            continue
 
     if len(homepages) != 1:
         print("No sources/Multiple homepages detected for " + url)
@@ -28,9 +30,10 @@ def get_name(page_soup, url):
 
     for source in sources:
         try:
-            names.add(source.text)
-        except TypeError:
+            names.add(source.text.replace('<br>', ''))
+        except:
             print("Unable to retrieve name from: " + str(source))
+            continue
 
     if len(names) != 1:
         print("No sources/Multiple names detected for " + url)
@@ -40,16 +43,38 @@ def get_name(page_soup, url):
         return names.pop()
 
 
+def get_factualreporting(page_soup, url):
+    valid_factuals = ["HIGH", "LOW",  "MIXED",  "MOSTLY FACTUAL", "VERY HIGH", "VERY LOW"]
+    sources = page_soup.find_all(
+        lambda tag: (tag.name == 'span' or tag.name == 'b' or tag.name == 'strong') and tag.text.strip() in valid_factuals)
+    factual_reporting = set()
+    for source in sources:
+        print("source: " + str(source))
+        try:
+            factual_reporting.add(source.text.strip())
+        except:
+            print("Unable to retrieve factual reporting from: " + str(source))
+            continue
+
+    if len(factual_reporting) != 1:
+        print("No sources/Multiple factual reporting detected for " + url)
+        print(factual_reporting)
+        return 'NA'
+    else:
+        return factual_reporting.pop()
+
+
 # URl to web scrap from.
 page_url = "https://mediabiasfactcheck.com"
 
 # categories of sources, each is a page
-categories = ["leftcenter", "center", "right-center", "right", "pro-science", "conspiracy", "fake-news", "satire", "left" ]
+categories = ["left", "leftcenter", "center", "right-center", "right", "pro-science", "conspiracy", "fake-news", "satire"]
+# categories = ["left"]
 
 # name the output file to write to local disk
 out_filename = "biases.csv"
 # header of csv file to be written
-headers = "category,homepage \n"
+headers = "name,homepage,category,factual\n"
 
 # opens file, and writes headers
 f = open(out_filename, "w")
@@ -60,6 +85,8 @@ biases = {}
 
 # loops over each product and grabs attributes about
 # each product
+
+
 for category in categories:
     # opens the connection and downloads html page from url
     uClient = uReq(page_url + "/" + category)
@@ -87,10 +114,15 @@ for category in categories:
 
     for url in urls:
 
+        print ("=============================================")
+
         try:
             uClient = uReq(url)
+            print("1")
             page_soup = soup(uClient.read(), "html.parser")
+            print("2")
             uClient.close()
+            print("3")
         except urllib.error.HTTPError:
             print('HTTPError! Skipping url: ' + url)
             continue
@@ -106,27 +138,25 @@ for category in categories:
 
         name = get_name(page_soup, url)
         homepage = get_homepages(page_soup, url)
+        factual = get_factualreporting(page_soup, url)
 
         if name == '' or homepage == '':
             continue
 
-
         # writes the dataset to .csv
-        f.write(homepage + ", " + name + "," + category + "\n")
+        f.write(homepage + "," + name + "," + category + "," + factual + "\n")
 
         # writes the dataset to json
         biases[homepage] = []
         biases[homepage].append({
             'name': name,
             'category': category,
+            'factual': factual
         })
 
         print("Added: " + category + ": " + name)
-
 
 f.close()  # Close the .csv file
 
 with open('biases.txt', 'w') as outfile:
     json.dump(biases, outfile)
-
-
