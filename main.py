@@ -144,8 +144,8 @@ def get_bias(req_json):
         with open('biases.txt') as json_file:
             biases = json.load(json_file)
             for url in urls:
-                http = "http://" + url
-                https = "https://" + url
+                http = "http://" + (url if url.startswith('www.') else ('www.' + url))
+                https = "https://" + (url if url.startswith('www.') else ('www.' + url))
                 extended_url = http if http in biases else (https if https in biases else url)
                 details = biases.get(extended_url, [])
                 if len(details) != 1:
