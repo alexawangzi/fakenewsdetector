@@ -24,6 +24,16 @@ function populateData() {
         document.getElementById("suggested-articles").innerHTML = articleBodyText;
         if (bias.length == 0) {
         	document.getElementById("source-trustworthyness").innerHTML = "No information about source found/provided";
+        } else {
+        	var sourceTextBody = "";
+        	bias.forEach(source => {
+        		sourceTextBody += "<div class='source'>";
+        		sourceTextBody += "<div><b>" + source.name + "</b></div>";
+        		sourceTextBody += "<div>Category: " + source.category + "</b></div>";
+        		sourceTextBody += "<div>Factual level: " + source.factual + "</b></div>";
+        		sourceTextBody += "</div>";
+        	})
+        	document.getElementById("source-trustworthyness").innerHTML = sourceTextBody;
         }
     });
 }
