@@ -90,12 +90,17 @@ def get_sentiment(annotation):
 def filter_keywords(annotation):
     keywords = [element['name'] for element in annotation['entities']]
 
+    split_keywords = []
+    for k in keywords:
+        split_keywords.extend(k.split(" "))
+
     print("keywords:")
     print(keywords)
 
     chars = set('0123456789$,.@#$%^&()_-=[]{}\/<>?|~`!')
 
-    filtered_keywords = [k for k in keywords if not any((c in chars) for c in k) and not any(char.isdigit() for char in k)]
+    filtered_keywords = [k for k in split_keywords if not any((c in chars) for c in k) and not any(char.isdigit() for char in k)]
+    
 
     if len(filtered_keywords) > 10:
         filtered_keywords = filtered_keywords[:10]
