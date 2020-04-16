@@ -4,9 +4,18 @@ function populateData() {
 		var bias = result.newsData.bias;
 		var sentiment = result.newsData.sentiment;
 
-		var marker1pc = sentiment.magnitude*100/2;
 		var marker2pc = (sentiment.score+1)*100/2;
-		document.getElementById("marker1").style.width = marker1pc + "%";
+		var sentiment = "";
+		if (-0.1 <= sentiment.score && 0.1 >= sentiment.score && sentiment.magnitude <= 1.5) {
+			sentiment = "neutral";
+		} else if (sentiment.score > 0.1) {
+			sentiment = "positive";
+		} else if (sentiment.score < -0.1) {
+			sentiment = "negative";
+		} else {
+			sentiment = "mixed";
+		}
+		document.getElementById("sentiment").innerHTML = "Sentiment: " + sentiment;
 		document.getElementById("marker2").style.width = marker2pc + "%";
         document.getElementById("article-count").innerHTML = "<b>Article found: " + news.articleCount + "</b>";
 
