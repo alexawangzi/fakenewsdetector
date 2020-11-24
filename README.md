@@ -1,4 +1,4 @@
-# A chrome plugin that cross check the information you highlighted on websites using internet database 
+# A chrome plugin that cross check the information you highlighted on websites
 
 What you will need:
 - Chrome browser (we reconmmend the latest version)
@@ -13,6 +13,11 @@ How to run:
 - Highlight any text and right click the highlighted content, choose 'Evalaute news'
 - A pop-up window will appear with the cross check information.
 
+Tools used:
+- Google Cloud
+- Google natural language API
+- GNews
+- Media Bias/Fact Check database
 
 
 ======= Enjoy! ======
