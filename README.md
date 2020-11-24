@@ -1,4 +1,4 @@
-# fncc-backend
+# A chrome plugin that cross check the information you highlighted on websites using internet database 
 
 What you will need:
 - Chrome browser (we reconmmend the latest version)
