@@ -20,4 +20,6 @@ Tools used:
 - Media Bias/Fact Check database
 
 
+find project details here : https://docs.google.com/presentation/d/19CCFbsPQkFO-gDYbntLJsc1F--qHvMXGencaAjlIk3U/edit?usp=sharing
+
 ======= Enjoy! ======
